@@ -4,7 +4,7 @@ namespace Icinga\Module\Director\Cli;
 
 use Icinga\Cli\Command as CliCommand;
 use Icinga\Module\Director\Application\MemoryLimit;
-use Icinga\Module\Director\Core\CoreApi;
+use Icinga\Module\Director\Core\DeploymentApiInterface;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\Objects\IcingaEndpoint;
 use Icinga\Application\Config;
@@ -14,7 +14,7 @@ class Command extends CliCommand
     /** @var  Db */
     protected $db;
 
-    /** @var  CoreApi */
+    /** @var  DeploymentApiInterface */
     private $api;
 
     protected function renderJson($object, $pretty = true)

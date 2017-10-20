@@ -2,7 +2,7 @@
 
 namespace Icinga\Module\Director\Web\Widget;
 
-use Icinga\Module\Director\Core\CoreApi;
+use Icinga\Module\Director\Core\DeploymentApiInterface;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\Forms\DeployConfigForm;
 use Icinga\Module\Director\IcingaConfig\IcingaConfig;
@@ -24,13 +24,13 @@ class DeployedConfigInfoHeader extends Html
     /** @var Db */
     protected $db;
 
-    /** @var CoreApi */
+    /** @var DeploymentApiInterface */
     protected $api;
 
     public function __construct(
         IcingaConfig $config,
         Db $db,
-        CoreApi $api,
+        DeploymentApiInterface $api,
         $deploymentId = null
     ) {
         $this->config = $config;
