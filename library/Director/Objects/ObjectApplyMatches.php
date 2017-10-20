@@ -4,7 +4,10 @@ namespace Icinga\Module\Director\Objects;
 
 use Icinga\Application\Benchmark;
 use Icinga\Data\Filter\Filter;
+use Icinga\Data\Filter\FilterAnd;
+use Icinga\Data\Filter\FilterChain;
 use Icinga\Data\Filter\FilterExpression;
+use Icinga\Data\Filter\FilterOr;
 use Icinga\Exception\ProgrammingError;
 use Icinga\Module\Director\Application\MemoryLimit;
 use Icinga\Module\Director\Db;
@@ -32,6 +35,7 @@ abstract class ObjectApplyMatches
 
     public function matchesFilter(Filter $filter)
     {
+        /** @var FilterExpression|FilterAnd|FilterOr $filter */
         $filter = clone($filter);
         static::fixFilterColumns($filter);
         return $filter->matches($this->flatObject);
@@ -47,6 +51,7 @@ abstract class ObjectApplyMatches
     {
         $result = array();
         Benchmark::measure(sprintf('Starting Filter %s', $filter));
+        /** @var FilterExpression|FilterAnd|FilterOr $filter */
         $filter = clone($filter);
         static::fixFilterColumns($filter);
         foreach (static::flatObjects($db) as $object) {
@@ -114,7 +119,7 @@ abstract class ObjectApplyMatches
             }
 
             $flat = $object->toPlainObject(true, false);
-            static::flattenVars($object);
+            static::flattenVars($flat);
             $objects[$object->getObjectName()] = $flat;
         }
         Benchmark::measure("ObjectApplyMatches: $type cache ready");
@@ -125,8 +130,10 @@ abstract class ObjectApplyMatches
     public static function fixFilterColumns(Filter $filter)
     {
         if ($filter->isExpression()) {
+            /** @var FilterExpression $filter */
             static::fixFilterExpressionColumn($filter);
         } else {
+            /** @var FilterChain $filter */
             foreach ($filter->filters() as $sub) {
                 static::fixFilterColumns($sub);
             }
