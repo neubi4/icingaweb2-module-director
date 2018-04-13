@@ -2,8 +2,6 @@
 
 namespace Icinga\Module\Director\Import\PurgeStrategy;
 
-use dipl\Html\Util;
-use Icinga\Application\Benchmark;
 use Icinga\Module\Director\Import\SyncUtils;
 use Icinga\Module\Director\Objects\ImportRun;
 use Icinga\Module\Director\Objects\ImportSource;
@@ -51,8 +49,6 @@ class ImportRunBasedPurgeStrategy extends PurgeStrategy
 
     public function listKeysRemovedBetween(ImportRun $runA, ImportRun $runB)
     {
-        Benchmark::measure('Purge: Begin finding keys');
-
         $rule = $this->getSyncRule();
         $db = $rule->getDb();
 
@@ -64,31 +60,7 @@ class ImportRunBasedPurgeStrategy extends PurgeStrategy
             'a.object_name'
         )->where('a.object_name NOT IN (?)', $selectB);
 
-
-
-        echo $selectA;
-        $a = $db->fetchAll($selectA);
-        Benchmark::measure('Query A: ' . count($a));
-
-        echo $selectB;
-        $b = $db->fetchAll($selectB);
-        Benchmark::measure('Query B: '. count($b));
-
-        echo $query;
-        $all = $db->fetchAll($query);
-        Benchmark::measure('Query Sub-Select: ' . count($all));
-
-        echo Benchmark::dump();
-
-        echo Util::wantHtml($db->fetchAll('EXPLAIN ' . $query))->render();
-
-        exit;
-
-        Benchmark::measure('Purge: Done prepare finding keys');
-
         $result = $db->fetchCol($query);
-
-        Benchmark::measure('Purge: Done fetch finding keys');
 
         if (empty($result)) {
             return array();
