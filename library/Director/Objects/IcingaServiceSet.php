@@ -301,4 +301,29 @@ class IcingaServiceSet extends IcingaObject
             );
         }
     }
+
+    public function onSingleIcingaConfig(IcingaConfig $config)
+    {
+        parent::onSingleIcingaConfig($config);
+
+        if ($this->id !== null) {
+            $query = $this->db->select()
+                ->from(
+                    ['o' => $this->table]
+                )->join(
+                    ['ssi' => $this->table . '_inheritance'],
+                    'ssi.service_set_id = o.id',
+                    []
+                )->where(
+                    'ssi.parent_service_set_id = ?',
+                    $this->id
+                );
+
+            $subSets = static::loadAll($this->connection, $query);
+
+            foreach ($subSets as $set) {
+                $set->renderToConfig($config);
+            }
+        }
+    }
 }

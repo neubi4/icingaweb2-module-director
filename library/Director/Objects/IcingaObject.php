@@ -1550,6 +1550,7 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
 
         try {
             $object->renderToConfig($config);
+            $object->onSingleIcingaConfig($config);
         } catch (Exception $e) {
             $config->configFile(
                 'failed-to-render'
@@ -1563,6 +1564,15 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
         }
 
         return $config;
+    }
+
+    /**
+     * Hook for rendering actions in preview mode
+     *
+     * @return void
+     */
+    public function onSingleIcingaConfig(IcingaConfig $config)
+    {
     }
 
     public function isSupportedInLegacy()
