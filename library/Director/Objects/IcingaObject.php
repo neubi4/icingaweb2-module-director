@@ -2038,7 +2038,11 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
     protected function renderLegacyGroups()
     {
         if ($this->supportsGroups()) {
-            return $this->groups()->toLegacyConfigString();
+            $applied = array();
+            if ($this instanceof IcingaHost) {
+                $applied = $this->getAppliedGroups();
+            }
+            return $this->groups()->toLegacyConfigString($applied);
         } else {
             return '';
         }
@@ -2247,10 +2251,23 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
      */
     public function renderAssign_Filter()
     {
-        // @codingStandardsIgnoreEnd
         return '    ' . AssignRenderer::forFilter(
             Filter::fromQueryString($this->get('assign_filter'))
         )->renderAssign() . "\n";
+    }
+
+    public function renderLegacyAssign_Filter()
+    {
+        // @codingStandardsIgnoreEnd
+        if ($this instanceof IcingaHostGroup) {
+            $c = "    # resolved memberships are set via the individual object\n";
+        } else {
+            $c = "    # assign is not supported for " . $this->type . "\n";
+        }
+        $c .= '    #' . AssignRenderer::forFilter(
+            Filter::fromQueryString($this->get('assign_filter'))
+        )->renderAssign() . "\n";
+        return $c;
     }
 
     public function toLegacyConfigString()
