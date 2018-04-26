@@ -1753,13 +1753,17 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
     /**
      * @codingStandardsIgnoreStart
      */
-    protected function renderLegacyHost_id()
+    protected function renderLegacyHost_id($value)
     {
-        return $this->renderLegacyRelationProperty(
-            'host',
-            $this->get('host_id'),
-            'host_name'
-        );
+        if (is_array($value)) {
+            return c1::renderKeyValue('host_name', c1::renderArray($value));
+        } else {
+            return $this->renderLegacyRelationProperty(
+                'host',
+                $this->get('host_id'),
+                'host_name'
+            );
+        }
     }
 
     /**
@@ -2271,6 +2275,8 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
         // @codingStandardsIgnoreEnd
         if ($this instanceof IcingaHostGroup) {
             $c = "    # resolved memberships are set via the individual object\n";
+        } elseif ($this instanceof IcingaService) {
+            $c = "    # resolved objects are listed here\n";
         } else {
             $c = "    # assign is not supported for " . $this->type . "\n";
         }
@@ -2809,6 +2815,27 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
         } else {
             return $value !== null;
         }
+    }
+
+    protected function mapHostsToZones($names)
+    {
+        $map = array();
+
+        foreach ($names as $hostname) {
+            /** @var IcingaHost $host */
+            $host = IcingaHost::load($hostname, $this->connection);
+
+            $zone = $host->getRenderingZone();
+            if (! array_key_exists($zone, $map)) {
+                $map[$zone] = array();
+            }
+
+            $map[$zone][] = $hostname;
+        }
+
+        ksort($map);
+
+        return $map;
     }
 
     public function getUrlParams()
