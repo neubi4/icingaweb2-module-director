@@ -18,6 +18,7 @@ use Icinga\Module\Director\Objects\IcingaService;
 use Icinga\Module\Director\Objects\SyncProperty;
 use Icinga\Module\Director\Objects\SyncRule;
 use Icinga\Module\Director\Objects\SyncRun;
+use Icinga\Module\Director\Resolver\TemplateTree;
 use Icinga\Module\Director\Util;
 use Icinga\Exception\IcingaException;
 
@@ -838,6 +839,8 @@ class Sync
         PrefetchCache::initialize($this->db);
 
         IcingaObject::prefetchAllRelationsByType($this->rule->object_type, $this->db);
+
+        TemplateTree::setSyncMode();
 
         return $this;
     }
