@@ -2058,7 +2058,7 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
      */
     protected function renderLegacyGroups()
     {
-        if ($this->supportsGroups()) {
+        if ($this->supportsGroups() && $this->hasBeenLoadedFromDb()) {
             $applied = array();
             if ($this instanceof IcingaHost) {
                 $applied = $this->getAppliedGroups();
