@@ -13,12 +13,12 @@ class IcingaServiceSet extends IcingaObject
     protected $table = 'icinga_service_set';
 
     protected $defaultProperties = array(
-        'id'                    => null,
-        'host_id'               => null,
-        'object_name'           => null,
-        'object_type'           => null,
-        'description'           => null,
-        'assign_filter'         => null,
+        'id'            => null,
+        'host_id'       => null,
+        'object_name'   => null,
+        'object_type'   => null,
+        'description'   => null,
+        'assign_filter' => null,
     );
 
     protected $keyName = array('host_id', 'object_name');
@@ -303,5 +303,39 @@ class IcingaServiceSet extends IcingaObject
                 $set->renderToConfig($config);
             }
         }
+    }
+
+    public function fetchDescendants()
+    {
+        $this->assertImportsSupport();
+
+        if ($this->object_type !== 'template' || ! $this->hasBeenLoadedFromDb()) {
+            return array();
+        }
+
+        $short = $this->getShortTableName();
+        $query = $this->db->select()
+            ->from(
+                ['o' => $this->table]
+            )->joinLeft(
+                ['ih' => $this->table . '_inheritance'],
+                'ih.' . $short . '_id = o.id',
+                []
+            )->where(
+                'ih.parent_' . $short . '_id = ?',
+                $this->id
+            )->order('o.object_name');
+
+        return static::loadAll($this->connection, $query, 'object_name');
+    }
+
+    public function beforeDelete()
+    {
+        // delete sets that inherit us cleanly
+        foreach ($this->fetchDescendants() as $hostSet) {
+            $hostSet->delete();
+        }
+
+        parent::beforeDelete();
     }
 }
