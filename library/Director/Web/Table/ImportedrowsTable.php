@@ -26,6 +26,7 @@ class ImportedrowsTable extends SimpleQueryBasedTable
     public function setImportRun(ImportRun $run)
     {
         $this->importRun = $run;
+        $this->searchColumns = $this->getColumnsToBeRendered();
         return $this;
     }
 

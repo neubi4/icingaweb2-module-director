@@ -5,6 +5,7 @@ namespace dipl\Web\Table;
 use Countable;
 use Icinga\Application\Benchmark;
 use Icinga\Data\Filter\Filter;
+use Icinga\Data\QueryInterface;
 use dipl\Data\Paginatable;
 use dipl\Db\Zf1\FilterRenderer;
 use dipl\Html\Table;
@@ -13,6 +14,7 @@ use dipl\Web\Widget\ControlsAndContent;
 use dipl\Web\Widget\Paginator;
 use dipl\Web\Table\Extension\QuickSearch;
 use dipl\Web\Url;
+use Zend_Db_Select as DbSelect;
 
 abstract class QueryBasedTable extends Table implements Countable
 {
@@ -48,6 +50,9 @@ abstract class QueryBasedTable extends Table implements Countable
      */
     abstract protected function getPaginationAdapter();
 
+    /**
+     * @return QueryInterface|DbSelect
+     */
     abstract public function getQuery();
 
     public function getPaginator(Url $url)
@@ -95,7 +100,11 @@ abstract class QueryBasedTable extends Table implements Countable
                 }
             }
 
-            FilterRenderer::applyToQuery($filter, $query);
+            if ($query instanceof DbSelect) {
+                FilterRenderer::applyToQuery($filter, $query);
+            } else {
+                $query->applyFilter($filter);
+            }
         }
 
         return $this;
