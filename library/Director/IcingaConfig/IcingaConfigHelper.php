@@ -255,14 +255,15 @@ class IcingaConfigHelper
             return (int) $interval;
         }
 
+        if(preg_match('/\$(.+)\$/', $interval, $matches)) {
+            return $matches[1];
+        }
+
         $parts = preg_split('/\s+/', $interval, -1, PREG_SPLIT_NO_EMPTY);
         $value = 0;
         foreach ($parts as $part) {
             if (! preg_match('/^(\d+)([dhms]?)$/', $part, $m)) {
-                throw new ProgrammingError(
-                    '"%s" is not a valid time (duration) definition',
-                    $interval
-                );
+                return $interval;
             }
             switch ($m[2]) {
                 case 'd':
@@ -286,6 +287,11 @@ class IcingaConfigHelper
     {
         // TODO: compat only, do this at munge time. All db fields should be int
         $seconds = self::parseInterval($interval);
+
+        if (!ctype_digit($seconds)) {
+            return $interval;
+        }
+
         if ($seconds === 0) {
             return '0s';
         }
